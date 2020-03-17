@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+    <title>Load COVID-19 data in QGIS</title>
+
+    <meta property="og:description" content="This is a Python script you can run in QGIS that loads the data from https://github.com/CSSEGISandData/COVID-19 provided by Johns Hopkins University CSSE. It currently loads point vectors of Confirmed Cases and Deaths.">
+    <meta property="og:image" content="static/img/covid19-qgis.webp"/>
+
+    <meta name="twitter:description" content="This is a Python script you can run in QGIS that loads the data from https://github.com/CSSEGISandData/COVID-19 provided by Johns Hopkins University CSSE. It currently loads point vectors of Confirmed Cases and Deaths.">
+    <meta name="twitter:image" content="static/img/covid19-qgis.webp"/>
+
+    <link rel="shortcut icon" href="https://bnhr.xyz/assets/img/logos/favicon-4.ico">
+
+    <!-- Bootstrap CSS -->
+    <link rel='stylesheet' href='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css' integrity='sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T' crossorigin='anonymous'>
+    <!-- Bootstrap JS -->
+    <script src='https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js' integrity='sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM' crossorigin='anonymous'></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1 style="padding: 16px 0 0 0" id="open-hazards-ph-qgis-browser">Open Hazards PH QGIS Browser</h1>
+        <p><strong>This</strong> is a Python script you can run in QGIS that loads the data from <a href="https://github.com/CSSEGISandData/COVID-19">https://github.com/CSSEGISandData/COVID-19</a> provided by Johns Hopkins University CSSE. It currently loads point vectors of Confirmed Cases and Deaths.
+
+        <h2 id="how-to">HOW-TO</h2>
+        <h3 id="open-the-qgis-python-console--ctrl--alt--p">Open the QGIS Python Console <img class="img-fluid" src="https://raw.githubusercontent.com/benhur07b/open-hazards-ph-qgis-browser/gh-pages/static/images/py.png" alt="Python Console" /> (CTRL + ALT + P)</h3>
+        <br>
+        <h3 id="click-show-editor---the-icon-that-looks-like-a-notepad-with-a-pen">Click Show Editor  <img class="img-fluid" src="https://raw.githubusercontent.com/benhur07b/open-hazards-ph-qgis-browser/gh-pages/static/images/ed.png" alt="Show Editor" /> (the icon that looks like a notepad with a pen)</h3>
+        <br>
+        <h3 id="copy-the-code-below-or-the-content-of-covid-19-load-qgis-in-the-editor">Copy the code below (or the content of covid19-load-qgis.py) in the editor</h3>
+        <br>
+		<pre><code class="python language-python">
+"""
+This script should be run from the Python Console inside QGIS (CTRL + ALT + P).
+
+It adds COVID-19 confirmed cases and deaths data from
+https://github.com/CSSEGISandData/COVID-19 provided by Johns Hopkins University CSSE.
+
+Script by Ben Hur Pintor
+License: GPLv3
+"""
+
+import requests
+import os
+import csv
+from qgis.core import QgsVectorLayer, QgsProject
+
+# Links to CSSEGISandData
+CASES_URL = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Confirmed.csv'
+DEATHS_URL = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_19-covid-Deaths.csv'
+
+# Path where CSVs will be downloaded and saved (can be changed)
+FPATH = os.getcwd()
+
+# Get and Save most recent CSVs
+cases_r = requests.get(CASES_URL)
+deaths_r = requests.get(DEATHS_URL)
+cases = "{}/cases.csv".format(FPATH)
+deaths = "{}/deaths.csv".format(FPATH)
+
+with open(cases, "w") as f1:
+    f1.write(cases_r.text)
+
+with open(deaths, "w") as f2:
+    f2.write(deaths_r.text)
+
+# Load Confirmed Cases CSV to QGIS
+cases_latest = next(csv.reader(open(cases)))[-1].replace("/","-")
+cases_local = "file://{uri}?delimiter={delimiter}&crs=epsg:4326&xField={x}&yField={y}".format(uri=cases, delimiter=",", x="Long", y="Lat")
+cases_layer = QgsVectorLayer(cases_local, "covid19-cases-as-of-{latest}".format(latest=cases_latest), "delimitedtext")
+QgsProject.instance().addMapLayer(cases_layer)
+
+#Load Deaths CSV to QGIS
+deaths_latest = next(csv.reader(open(deaths)))[-1].replace("/","-")
+deaths_local = "file://{uri}?delimiter={delimiter}&crs=epsg:4326&xField={x}&yField={y}".format(uri=deaths, delimiter=",", x="Long", y="Lat")
+deaths_layer = QgsVectorLayer(deaths_local, "covid19-deaths-as-of-{latest}".format(latest=deaths_latest), "delimitedtext")
+QgsProject.instance().addMapLayer(deaths_layer)
+
+        </code></pre>
+
+    	<p><img class="img-fluid" src="https://raw.githubusercontent.com/benhur07b/covid19-load-qgis/gh-pages/static/img/copy-to-editor.webp" alt="Copy code to Editor" /></p>
+        <br>
+        <h3>Run</h3>
+        <p><img class="img-fluid" src="https://raw.githubusercontent.com/benhur07b/covid19-load-qgis/gh-pages/static/img/covid19-load-qgis.gif" alt="Run" /></p>
+
+    </div>
+
+    <div class='container' style='padding: 12px'>
+        <hr>
+        <p class='small'>
+        <a rel='license' href='http://creativecommons.org/licenses/by-sa/4.0/'><img class='mb-2' alt='Creative Commons License' style='border-width:0' src='https://i.creativecommons.org/l/by-sa/4.0/80x15.png' /></a>
+        <br/>
+        This work and its contents by <a xmlns:cc='http://creativecommons.org/ns#' href='https://bnhr.xyz' property='cc:attributionName' rel='cc:attributionURL'>Ben Hur S. Pintor</a> is licensed under a <a rel='license' href='http://creativecommons.org/licenses/by-sa/4.0/'>Creative Commons Attribution-ShareAlike 4.0 International License</a>.<br>
+        Other works (software, source code, etc.) referenced in this website are under their own respective licenses.<br>
+        </p>
+    </div>
+
+</body>
+</html>

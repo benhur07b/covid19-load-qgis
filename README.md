@@ -1,7 +1,7 @@
 # COVID-19 Load QGIS Python script
 
 A Python script you can run in QGIS that loads the data from https://github.com/CSSEGISandData/COVID-19 provided by Johns Hopkins University CSSE.
-This script loads a point vector of Confirmed Cases and Deaths.
+It currently loads point vectors of Confirmed Cases and Deaths.
 
 ## How to run
 1. Open QGIS
