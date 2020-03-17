@@ -1,3 +1,13 @@
+"""
+This script should be run from the Python Console inside QGIS (CTRL + ALT + P).
+
+It adds COVID-19 confirmed cases and deaths data from
+https://github.com/CSSEGISandData/COVID-19 provided by Johns Hopkins University CSSE.
+
+Script by Ben Hur Pintor
+License: GPLv3
+"""
+
 import requests
 import os
 import csv
